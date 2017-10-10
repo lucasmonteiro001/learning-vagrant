@@ -1,3 +1,6 @@
+#PLUGIN
+#vagrant plugin install vagrant-hostsupdater
+
 Vagrant.configure("2") do |config|
 
   config.vm.define "myvirtualmachine" do |myvirtualmachine|
