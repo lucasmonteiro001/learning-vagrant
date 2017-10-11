@@ -2,5 +2,32 @@
 - hosts: all
   become: true
   remote_user: root
-  roles:
-    - general
+  vars:
+    node_version: 6.1.0
+  tasks:
+    - name: Install Git
+      apt: pkg=git update_cache=yes state=latest
+      
+    - name: Download the nvm(node version manager) install script
+      get_url: url=https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh dest=/tmp/install.sh
+
+    - name: Install dependencies 
+      apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+      with_items:
+        - git
+        - curl
+        - build-essential
+        - libssl-dev
+      become: yes
+      become_user: root
+
+    - name: Execute the nvm install script
+      shell: bash install.sh chdir=/tmp executable=/bin/bash
+
+    # - name: Register the NVM_DIR
+    #   shell: echo $NVM_DIR
+    #   register: nvm_dir 
+
+    - name: Install the specified node version using the nvm command and set it as default
+      shell: . ~/.nvm/nvm.sh && nvm install {{ node_version }} && nvm run {{node_version}} --version && nvm alias default {{node_version}}
+              creates=~/.nvm/versions/node/v{{ node_version }} 
